@@ -1,8 +1,8 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google"; // FIXED: Use Google Fonts instead of local files
+import { Inter } from "next/font/google";
+// CRITICAL: This import applies the Tailwind styles to the whole app
 import "./globals.css";
 
-// Initialize the Inter font (Standard, Clean, and Reliable)
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
@@ -16,7 +16,6 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    // FIXED: Added suppressHydrationWarning to stop browser extension errors
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased bg-gray-50`}>
         {children}
