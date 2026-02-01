@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { db } from "@/app/lib/firebase"; 
 import { collection, query, where, getDocs } from "firebase/firestore";
-// FIX: Using absolute alias path. Ensure file is named 'Breadcrumbs.tsx' in 'app/components'
 import Breadcrumbs from "@/app/components/Breadcrumbs"; 
 import { notFound } from "next/navigation";
 
@@ -73,7 +72,7 @@ export default async function SubjectPage({ params, searchParams }: Props) {
 
       <main className="max-w-4xl mx-auto px-4 py-6 w-full">
         
-        {/* Breadcrumbs Component */}
+        {/* Breadcrumbs */}
         <Breadcrumbs 
           items={[
             { label: `Semester ${id}`, href: `/semester/${id}` },
@@ -91,7 +90,19 @@ export default async function SubjectPage({ params, searchParams }: Props) {
           {/* VIEW: NOTES */}
           {activeTab === "notes" && (
             notes.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-300 text-gray-500">No notes yet.</div>
+              <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                <div className="text-5xl mb-4">📭</div>
+                <h3 className="text-xl font-bold text-gray-800 mb-2">No notes found</h3>
+                <p className="text-gray-500 max-w-md mx-auto mb-6">
+                  We are working on this subject. If you have good notes, help your juniors!
+                </p>
+                <a 
+                  href={`mailto:support@rustudyhub.com?subject=Contribute Notes for Sem ${id} - ${subjectName}`}
+                  className="inline-flex items-center gap-2 px-6 py-2.5 bg-blue-50 text-blue-700 font-bold rounded-full hover:bg-blue-100 transition-colors border border-blue-200"
+                >
+                  📤 Contribute Notes
+                </a>
+              </div>
             ) : (
               notes.map((note) => (
                 <div key={note.id} className="bg-white p-6 rounded-lg shadow-sm border border-gray-200">
@@ -105,9 +116,9 @@ export default async function SubjectPage({ params, searchParams }: Props) {
           {/* VIEW: SYLLABUS */}
           {activeTab === "syllabus" && (
             !syllabusData ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-300">
-                 <p className="text-gray-500">Syllabus not uploaded yet.</p>
-                 <Link href="/admin/dashboard" className="text-sm text-blue-600 hover:underline mt-2 inline-block">Upload it now</Link>
+              <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                 <p className="text-gray-500 mb-4">Syllabus not uploaded yet.</p>
+                 <Link href="/admin/login" className="text-sm text-blue-600 hover:underline">Admin? Upload it now</Link>
               </div>
             ) : (
               <div className="bg-white p-8 rounded-lg shadow-sm border border-gray-200">
@@ -120,9 +131,11 @@ export default async function SubjectPage({ params, searchParams }: Props) {
           {/* VIEW: PYQ */}
           {activeTab === "pyq" && (
             pyqs.length === 0 ? (
-              <div className="text-center py-12 bg-white rounded-lg border border-dashed border-gray-300">
-                <p className="text-gray-500">No previous year questions uploaded yet.</p>
-                <Link href="/admin/dashboard" className="text-sm text-blue-600 hover:underline mt-2 inline-block">Upload Archive</Link>
+              <div className="text-center py-16 bg-white rounded-xl border-2 border-dashed border-gray-200">
+                <p className="text-gray-500 mb-4">No previous year questions available.</p>
+                <Link href="/contact" className="px-6 py-2.5 bg-gray-100 text-gray-700 font-bold rounded-full hover:bg-gray-200 transition-colors">
+                  Request PYQs
+                </Link>
               </div>
             ) : (
               <div className="grid gap-4">
@@ -150,49 +163,28 @@ export default async function SubjectPage({ params, searchParams }: Props) {
           )}
         </div>
 
-        {/* --- RELATED CONTENT LOOP (Retention Hook) --- */}
+        {/* --- RELATED CONTENT LOOP --- */}
         <div className="mt-12 border-t border-gray-100 pt-8">
           <h4 className="font-bold text-gray-800 text-lg mb-4">What's Next?</h4>
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             
-            {/* 1. Link to Notes (if not currently viewing notes) */}
             {activeTab !== "notes" && (
-              <Link 
-                href="?view=notes"
-                className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4"
-              >
+              <Link href="?view=notes" className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-blue-300 hover:shadow-md transition-all flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-blue-50 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">📚</div>
-                <div>
-                  <h5 className="font-bold text-gray-800 group-hover:text-blue-600">Start Reading Notes</h5>
-                  <p className="text-xs text-gray-500">Deep dive into unit-wise topics.</p>
-                </div>
+                <div><h5 className="font-bold text-gray-800 group-hover:text-blue-600">Start Reading Notes</h5><p className="text-xs text-gray-500">Deep dive into unit-wise topics.</p></div>
               </Link>
             )}
 
-            {/* 2. Link to PYQs (if not currently viewing pyqs) */}
             {activeTab !== "pyq" && (
-              <Link 
-                href="?view=pyq"
-                className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all flex items-center gap-4"
-              >
+              <Link href="?view=pyq" className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-purple-300 hover:shadow-md transition-all flex items-center gap-4">
                 <div className="w-10 h-10 rounded-full bg-purple-50 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">📝</div>
-                <div>
-                  <h5 className="font-bold text-gray-800 group-hover:text-purple-600">Check Past Papers</h5>
-                  <p className="text-xs text-gray-500">See what questions appeared in 2022-24.</p>
-                </div>
+                <div><h5 className="font-bold text-gray-800 group-hover:text-purple-600">Check Past Papers</h5><p className="text-xs text-gray-500">See what questions appeared in 2022-24.</p></div>
               </Link>
             )}
 
-            {/* 3. Link to Mock Tests (Always show) */}
-            <Link 
-              href="/mock-tests"
-              className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all flex items-center gap-4"
-            >
+            <Link href="/mock-tests" className="group p-4 bg-white border border-gray-200 rounded-xl hover:border-green-300 hover:shadow-md transition-all flex items-center gap-4">
               <div className="w-10 h-10 rounded-full bg-green-50 flex items-center justify-center text-xl group-hover:scale-110 transition-transform">⏱️</div>
-              <div>
-                <h5 className="font-bold text-gray-800 group-hover:text-green-600">Take a Mock Test</h5>
-                <p className="text-xs text-gray-500">Test your knowledge with a quick quiz.</p>
-              </div>
+              <div><h5 className="font-bold text-gray-800 group-hover:text-green-600">Take a Mock Test</h5><p className="text-xs text-gray-500">Test your knowledge with a quick quiz.</p></div>
             </Link>
 
           </div>
