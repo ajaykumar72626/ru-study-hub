@@ -11,6 +11,7 @@ export default function Navbar() {
   const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   
+  // Search History State
   const [searchHistory, setSearchHistory] = useState<string[]>([]);
   const [showHistory, setShowHistory] = useState(false);
   const searchContainerRef = useRef<HTMLDivElement>(null);
@@ -25,6 +26,7 @@ export default function Navbar() {
     { name: "Mock Tests", href: "/mock-tests" },
   ];
 
+  // Load history on mount
   useEffect(() => {
     const saved = localStorage.getItem("ru_search_history");
     if (saved) {
@@ -32,6 +34,7 @@ export default function Navbar() {
     }
   }, []);
 
+  // Close history when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       if (searchContainerRef.current && !searchContainerRef.current.contains(event.target as Node)) {
@@ -81,7 +84,7 @@ export default function Navbar() {
     setSearchQuery("");
     setShowHistory(false);
     setIsMobileSearchOpen(false); // Close the mobile search bar
-    router.push("/");
+    router.push("/"); // Redirect to Home
   };
 
   const removeHistoryItem = (e: React.MouseEvent, itemToRemove: string) => {
@@ -113,7 +116,7 @@ export default function Navbar() {
               />
               {searchQuery && (
                 <button 
-                  onClick={() => setSearchQuery("")}
+                  onClick={clearSearch} // FIXED: Now calls clearSearch() instead of just clearing text
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
                   ✕
@@ -121,7 +124,7 @@ export default function Navbar() {
               )}
             </div>
             <button 
-              onClick={() => { setIsMobileSearchOpen(false); setSearchQuery(""); }}
+              onClick={clearSearch} // FIXED: Cancel button also redirects home and closes search
               className="text-sm font-medium text-gray-600 whitespace-nowrap px-2"
             >
               Cancel
@@ -136,8 +139,8 @@ export default function Navbar() {
                 <span className="text-xl font-bold text-blue-700 tracking-tight">
                   RU Study Hub
                 </span>
-                <span className="text-[10px] bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full font-bold border border-blue-100">
-                  BETA
+                <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
+                  Beta
                 </span>
               </Link>
             </div>
