@@ -1,7 +1,8 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import Navbar from "./components/Navbar"; 
-import Footer from "./components/Footer"; // Import the new Footer
+import Footer from "./components/Footer"; 
+import GoogleAnalytics from "./components/GoogleAnalytics"; 
 import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -19,15 +20,13 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className} antialiased bg-slate-50 flex flex-col min-h-screen`}>
-        {/* Fixed Navbar at the top */}
-        <Navbar />
+        {/* PASTE YOUR ID HERE inside the quotes */}
+        <GoogleAnalytics GA_MEASUREMENT_ID="G-T525WD2DRQ" />
         
-        {/* Main content grows to fill space */}
+        <Navbar />
         <div className="flex-grow">
           {children}
         </div>
-
-        {/* Global Footer at the bottom */}
         <Footer />
       </body>
     </html>
