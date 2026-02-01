@@ -2,9 +2,9 @@ import Link from "next/link";
 import { db } from "@/app/lib/firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
-// --- FORCE DYNAMIC (New Line) ---
-// This tells Next.js: "Re-fetch data from Firebase every time someone visits the home page."
-export const dynamic = "force-dynamic"; 
+// FIXED: Use revalidate = 0 instead of force-dynamic to avoid errors
+// This ensures the page always fetches fresh data from Firebase
+export const revalidate = 0;
 
 // --- FETCH RECENT UPDATES (Server Side) ---
 async function getRecentUpdates() {
