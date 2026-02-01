@@ -44,28 +44,45 @@ export default function Navbar() {
     return () => document.removeEventListener("mousedown", handleClickOutside);
   }, []);
 
-  const handleSearch = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === 'Enter' && searchQuery.trim()) {
-      executeSearch(searchQuery);
+  const handleSearchChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const query = e.target.value;
+    setSearchQuery(query);
+    
+    if (query.trim()) {
+      // Real-time search: Push to search page as you type (with debounce recommended in production, but direct here for instant feel)
+      router.push(`/search?q=${encodeURIComponent(query)}`);
+      setShowHistory(false);
+    } else {
+      setShowHistory(true);
     }
   };
 
-  const executeSearch = (query: string) => {
-    if (!query.trim()) return;
-    
-    // Save to history (keep top 5 unique)
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    if (e.key === 'Enter' && searchQuery.trim()) {
+      saveToHistory(searchQuery);
+      setShowHistory(false);
+      setIsMobileMenuOpen(false);
+    }
+  };
+
+  const saveToHistory = (query: string) => {
     const updatedHistory = [query, ...searchHistory.filter(h => h !== query)].slice(0, 5); 
     setSearchHistory(updatedHistory);
     localStorage.setItem("ru_search_history", JSON.stringify(updatedHistory));
+  };
 
+  const executeHistorySearch = (query: string) => {
+    setSearchQuery(query);
     router.push(`/search?q=${encodeURIComponent(query)}`);
-    setIsMobileMenuOpen(false); 
     setShowHistory(false);
+    setIsMobileMenuOpen(false);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
-    setShowHistory(false); 
+    setShowHistory(false);
+    // Automatically push back to Home Page when cleared
+    router.push("/");
   };
 
   const removeHistoryItem = (e: React.MouseEvent, itemToRemove: string) => {
@@ -123,8 +140,8 @@ export default function Navbar() {
                   className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-full leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 sm:text-sm transition-colors"
                   placeholder="Search topics..."
                   value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  onKeyDown={handleSearch}
+                  onChange={handleSearchChange}
+                  onKeyDown={handleKeyDown}
                   onFocus={() => setShowHistory(true)}
                 />
                 {searchQuery && (
@@ -138,7 +155,7 @@ export default function Navbar() {
               </div>
 
               {/* Desktop History Dropdown */}
-              {showHistory && searchHistory.length > 0 && (
+              {showHistory && searchHistory.length > 0 && !searchQuery && (
                 <div className="absolute top-full mt-2 w-full bg-white rounded-lg shadow-lg border border-gray-100 overflow-hidden z-50">
                   <div className="px-3 py-2 text-xs font-semibold text-gray-400 uppercase bg-gray-50">
                     Recent Searches
@@ -148,10 +165,7 @@ export default function Navbar() {
                       <li key={index} className="border-b border-gray-50 last:border-none">
                         <div 
                           className="flex justify-between items-center px-4 py-2 hover:bg-blue-50 cursor-pointer group"
-                          onClick={() => {
-                            setSearchQuery(term);
-                            executeSearch(term);
-                          }}
+                          onClick={() => executeHistorySearch(term)}
                         >
                           <span className="text-sm text-gray-600 group-hover:text-blue-700">{term}</span>
                           <button 
@@ -207,8 +221,9 @@ export default function Navbar() {
                 className="block w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base"
                 placeholder="Search notes, PYQs..."
                 value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                onKeyDown={handleSearch}
+                onChange={handleSearchChange}
+                onKeyDown={handleKeyDown}
+                onFocus={() => setShowHistory(true)}
               />
                {searchQuery && (
                   <button 
