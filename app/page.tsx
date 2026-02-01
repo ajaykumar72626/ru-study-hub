@@ -1,39 +1,68 @@
 import Link from "next/link";
+import { db } from "@/app/lib/firebase";
+import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
-export default function Home() {
-  // We define our semesters here to loop through them easily
+// --- FETCH RECENT UPDATES (Server Side) ---
+async function getRecentUpdates() {
+  const updates: any[] = [];
+  try {
+    // 1. Fetch latest 3 Notes
+    const notesQ = query(collection(db, "notes"), orderBy("createdAt", "desc"), limit(3));
+    const notesSnap = await getDocs(notesQ);
+    notesSnap.forEach(doc => {
+      const data = doc.data();
+      updates.push({
+        id: doc.id,
+        type: "Note",
+        title: data.unitTitle,
+        details: `Sem ${data.semester} • ${data.subjectId.toUpperCase()}`,
+        link: `/semester/${data.semester}/${data.subjectId}?view=notes`,
+        date: data.createdAt?.seconds || 0
+      });
+    });
+
+    // 2. Fetch latest 3 PYQs
+    const pyqQ = query(collection(db, "pyq"), orderBy("createdAt", "desc"), limit(3));
+    const pyqSnap = await getDocs(pyqQ);
+    pyqSnap.forEach(doc => {
+      const data = doc.data();
+      updates.push({
+        id: doc.id,
+        type: "PYQ",
+        title: `${data.year} Question Paper`,
+        details: `Sem ${data.semester} • ${data.subjectId.toUpperCase()}`,
+        link: `/pyq/view/${doc.id}`,
+        date: data.createdAt?.seconds || 0
+      });
+    });
+
+  } catch (error) {
+    console.error("Error fetching updates:", error);
+    // Fail silently so the home page still loads even if DB is empty
+  }
+
+  // Combine, Sort by Date (Newest First), and take top 4
+  return updates.sort((a, b) => b.date - a.date).slice(0, 4);
+}
+
+export default async function Home() {
+  const recentItems = await getRecentUpdates();
+
   const semesters = [
-    { id: 1, title: "Semester 1", desc: "C Programming, Maths, Architecture" },
-    { id: 2, title: "Semester 2", desc: "Java, Discrete Maths, EVS" },
-    { id: 3, title: "Semester 3", desc: "Data Structures, OS, Networking" },
-    { id: 4, title: "Semester 4", desc: "Algorithms, Software Eng, DBMS" },
-    { id: 5, title: "Semester 5", desc: "Internet Tech, Theory of Comp" },
-    { id: 6, title: "Semester 6", desc: "AI, IoT, Project Work" },
+    { id: 1, title: "Semester 1", desc: "C Programming, Maths, Architecture, Physics" },
+    { id: 2, title: "Semester 2", desc: "Java, Discrete Maths, EVS, Maths, Physics" },
+    { id: 3, title: "Semester 3", desc: "Data Structures, OS, Networking, Maths, Physics" },
+    { id: 4, title: "Semester 4", desc: "Algorithms, Software Eng, DBMS, Maths, Physics" },
+    { id: 5, title: "Semester 5", desc: "Internet Tech, Theory of Comp, Cloud Computing" },
+    { id: 6, title: "Semester 6", desc: "AI, Graphics, Numerical Methods, Project Work" },
   ];
 
   return (
-    <div className="min-h-screen flex flex-col">
-      {/* --- HEADER --- */}
-      <header className="w-full bg-white border-b border-gray-200 sticky top-0 z-10">
-        <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            {/* Simple Text Logo for now */}
-            <h1 className="text-xl font-bold text-blue-700 tracking-tight">
-              RU Study Hub
-            </h1>
-            <span className="text-xs bg-blue-100 text-blue-800 px-2 py-0.5 rounded-full font-medium">
-              Beta
-            </span>
-          </div>
-          <nav className="hidden md:flex gap-6 text-sm font-medium text-gray-600">
-            <Link href="#" className="hover:text-blue-600">About</Link>
-            <Link href="#" className="hover:text-blue-600">Contact</Link>
-          </nav>
-        </div>
-      </header>
+    <div className="min-h-screen flex flex-col bg-white">
+      {/* HEADER REMOVED - Using Global Navbar from layout.tsx */}
 
       <main className="flex-grow">
-        {/* --- HERO SECTION --- */}
+        {/* --- HERO SECTION (Original Design) --- */}
         <section className="bg-blue-700 text-white py-16 px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
             <h2 className="text-3xl md:text-5xl font-extrabold leading-tight">
@@ -46,8 +75,37 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- SEMESTER GRID --- */}
-        <section className="max-w-6xl mx-auto px-4 py-12 -mt-8">
+        {/* --- RECENT UPDATES SECTION (New) --- */}
+        {recentItems.length > 0 && (
+          <section className="max-w-6xl mx-auto px-4 pt-12 -mb-4">
+            <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
+              <h3 className="text-lg font-bold text-blue-800 mb-4 flex items-center gap-2">
+                <span className="text-xl">📢</span> Recently Added
+              </h3>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                {recentItems.map((item) => (
+                  <Link 
+                    key={item.id} 
+                    href={item.link}
+                    className="block bg-white p-4 rounded-lg shadow-sm border border-blue-100 hover:shadow-md hover:border-blue-300 transition-all"
+                  >
+                    <div className="flex items-start justify-between mb-2">
+                      <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase ${item.type === 'Note' ? 'bg-purple-100 text-purple-700' : 'bg-orange-100 text-orange-700'}`}>
+                        {item.type}
+                      </span>
+                      <span className="text-gray-300 text-xs">New</span>
+                    </div>
+                    <h4 className="font-bold text-gray-800 text-sm line-clamp-1">{item.title}</h4>
+                    <p className="text-xs text-gray-500 mt-1">{item.details}</p>
+                  </Link>
+                ))}
+              </div>
+            </div>
+          </section>
+        )}
+
+        {/* --- SEMESTER GRID (Original Design) --- */}
+        <section className="max-w-6xl mx-auto px-4 py-12">
           <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 md:p-8">
             <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
               <span className="w-1 h-6 bg-blue-600 rounded-full"></span>
@@ -78,7 +136,7 @@ export default function Home() {
           </div>
         </section>
 
-        {/* --- FEATURES SECTION --- */}
+        {/* --- FEATURES SECTION (Original Design) --- */}
         <section className="max-w-6xl mx-auto px-4 py-8 mb-12">
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="p-4">
@@ -100,10 +158,7 @@ export default function Home() {
         </section>
       </main>
 
-      {/* --- FOOTER --- */}
-      <footer className="bg-gray-900 text-gray-400 py-8 text-center text-sm">
-        <p>© {new Date().getFullYear()} RU Study Hub. Built with ❤️ for Students.</p>
-      </footer>
+      {/* FOOTER REMOVED - Using Global Footer from layout.tsx */}
     </div>
   );
 }

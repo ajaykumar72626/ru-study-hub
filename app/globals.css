@@ -1,25 +1,17 @@
-/* --- TAILWIND V4 SETUP --- */
-@import "tailwindcss";
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-/* Link to your config file (Go up one level from 'app' to root) */
-@config "../tailwind.config.ts";
-
-/* --- DESIGN SYSTEM TOKENS --- */
-@theme {
-  --color-foreground: 15 23 42;
-  --color-background-start: 248 250 252;
-  --color-background-end: 241 245 249;
-}
-
-/* --- CUSTOM STYLES --- */
 :root {
   --foreground-rgb: 15, 23, 42;
+  --background-start-rgb: 248, 250, 252;
+  --background-end-rgb: 241, 245, 249;
 }
 
 body {
   color: rgb(var(--foreground-rgb));
   background-color: #f8fafc;
-  /* The Tech Grid Pattern */
+  /* Tech Grid Pattern Background */
   background-image: 
     linear-gradient(#e2e8f0 1px, transparent 1px),
     linear-gradient(to right, #e2e8f0 1px, transparent 1px);
@@ -27,7 +19,7 @@ body {
   min-h-screen: 100vh;
 }
 
-/* --- ANIMATIONS & UTILITIES --- */
+/* Define Animations in the utilities layer */
 @layer utilities {
   .animate-blob {
     animation: blob 7s infinite;
