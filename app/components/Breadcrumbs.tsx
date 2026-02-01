@@ -7,7 +7,6 @@ type BreadcrumbItem = {
 
 export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
   return (
-    // Added overflow-x-auto and whitespace-nowrap for mobile scrolling
     <nav className="flex text-sm font-medium text-gray-500 mb-6 overflow-x-auto whitespace-nowrap pb-2 scrollbar-hide" aria-label="Breadcrumb">
       <ol className="inline-flex items-center space-x-1 md:space-x-3">
         <li className="inline-flex items-center">
@@ -40,6 +39,4 @@ export default function Breadcrumbs({ items }: { items: BreadcrumbItem[] }) {
       </ol>
     </nav>
   );
-}git add .
-git commit -m "Update Navbar: Instant search and clear-to-home logic"
-git push
+}
