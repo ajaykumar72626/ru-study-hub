@@ -8,6 +8,7 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [isMobileSearchOpen, setIsMobileSearchOpen] = useState(false); // New state for mobile search toggle
   const [searchQuery, setSearchQuery] = useState("");
   
   // Search History State
@@ -49,7 +50,6 @@ export default function Navbar() {
     setSearchQuery(query);
     
     if (query.trim()) {
-      // Real-time search: Push to search page as you type (with debounce recommended in production, but direct here for instant feel)
       router.push(`/search?q=${encodeURIComponent(query)}`);
       setShowHistory(false);
     } else {
@@ -62,6 +62,7 @@ export default function Navbar() {
       saveToHistory(searchQuery);
       setShowHistory(false);
       setIsMobileMenuOpen(false);
+      setIsMobileSearchOpen(false);
     }
   };
 
@@ -76,17 +77,17 @@ export default function Navbar() {
     router.push(`/search?q=${encodeURIComponent(query)}`);
     setShowHistory(false);
     setIsMobileMenuOpen(false);
+    setIsMobileSearchOpen(false);
   };
 
   const clearSearch = () => {
     setSearchQuery("");
     setShowHistory(false);
-    // Automatically push back to Home Page when cleared
     router.push("/");
   };
 
   const removeHistoryItem = (e: React.MouseEvent, itemToRemove: string) => {
-    e.stopPropagation(); // Prevent triggering selection
+    e.stopPropagation();
     const updated = searchHistory.filter(item => item !== itemToRemove);
     setSearchHistory(updated);
     localStorage.setItem("ru_search_history", JSON.stringify(updated));
@@ -98,8 +99,8 @@ export default function Navbar() {
         <div className="flex justify-between items-center h-16">
           
           {/* --- LOGO SECTION --- */}
-          {/* Mobile: Centered Absolute | Desktop: Left Relative */}
-          <div className="flex-shrink-0 z-10 absolute left-1/2 transform -translate-x-1/2 lg:static lg:transform-none lg:left-auto">
+          {/* Mobile: Left | Desktop: Left */}
+          <div className="flex-shrink-0 z-10 flex items-center">
             <Link href="/" className="flex items-center gap-2">
               <span className="text-xl font-bold text-blue-700 tracking-tight">
                 RU Study Hub
@@ -126,8 +127,7 @@ export default function Navbar() {
           </div>
 
           {/* --- RIGHT SIDE TOOLS --- */}
-          {/* Desktop: Search | Mobile: Hamburger Menu */}
-          <div className="flex items-center gap-4 z-10 ml-auto">
+          <div className="flex items-center gap-2 z-10 ml-auto">
             
             {/* Desktop Search */}
             <div className="hidden lg:block relative w-64" ref={searchContainerRef}>
@@ -183,14 +183,30 @@ export default function Navbar() {
               )}
             </div>
 
-            {/* Mobile Menu Button (Hamburger) */}
-            <div className="lg:hidden flex items-center">
+            {/* Mobile Search Icon Toggle */}
+            <div className="lg:hidden">
               <button
-                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                onClick={() => {
+                  setIsMobileSearchOpen(!isMobileSearchOpen);
+                  setIsMobileMenuOpen(false); // Close menu if search opens
+                }}
+                className="text-gray-600 hover:text-blue-600 focus:outline-none p-2"
+                aria-label="Toggle search"
+              >
+                <span className="text-xl">🔍</span>
+              </button>
+            </div>
+
+            {/* Mobile Menu Button (Hamburger) */}
+            <div className="lg:hidden">
+              <button
+                onClick={() => {
+                  setIsMobileMenuOpen(!isMobileMenuOpen);
+                  setIsMobileSearchOpen(false); // Close search if menu opens
+                }}
                 className="text-gray-600 hover:text-blue-600 focus:outline-none p-2"
                 aria-label="Toggle menu"
               >
-                {/* Switch between Hamburger and X icon */}
                 {isMobileMenuOpen ? (
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -206,35 +222,38 @@ export default function Navbar() {
         </div>
       </div>
 
+      {/* --- MOBILE SEARCH BAR (Slide Down) --- */}
+      {isMobileSearchOpen && (
+        <div className="lg:hidden bg-white border-t border-gray-100 px-4 py-3 shadow-sm absolute w-full z-40">
+          <div className="relative w-full">
+            <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span className="text-gray-400">🔍</span>
+            </div>
+            <input
+              autoFocus
+              type="text"
+              className="block w-full pl-10 pr-8 py-2 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base"
+              placeholder="Search notes, PYQs..."
+              value={searchQuery}
+              onChange={handleSearchChange}
+              onKeyDown={handleKeyDown}
+            />
+            {searchQuery && (
+              <button 
+                onClick={clearSearch}
+                className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
+              >
+                ✕
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* --- MOBILE MENU DROPDOWN --- */}
       {isMobileMenuOpen && (
         <div className="lg:hidden bg-white border-t border-gray-100 shadow-lg absolute w-full z-40">
           <div className="px-4 pt-4 pb-4 space-y-4">
-             
-             {/* Mobile Search */}
-             <div className="relative w-full">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <span className="text-gray-400">🔍</span>
-              </div>
-              <input
-                type="text"
-                className="block w-full pl-10 pr-8 py-2.5 border border-gray-300 rounded-lg leading-5 bg-gray-50 placeholder-gray-500 focus:outline-none focus:bg-white focus:ring-1 focus:ring-blue-500 focus:border-blue-500 text-base"
-                placeholder="Search notes, PYQs..."
-                value={searchQuery}
-                onChange={handleSearchChange}
-                onKeyDown={handleKeyDown}
-                onFocus={() => setShowHistory(true)}
-              />
-               {searchQuery && (
-                  <button 
-                    onClick={clearSearch}
-                    className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
-                  >
-                    ✕
-                  </button>
-                )}
-            </div>
-
             {/* Mobile Nav Links (Centered) */}
             <div className="flex flex-col space-y-2 text-center">
               {navLinks.map((link) => (
