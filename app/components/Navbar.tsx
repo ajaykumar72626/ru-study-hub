@@ -83,6 +83,7 @@ export default function Navbar() {
   const clearSearch = () => {
     setSearchQuery("");
     setShowHistory(false);
+    setIsMobileSearchOpen(false); // Close the mobile search bar
     router.push("/");
   };
 
