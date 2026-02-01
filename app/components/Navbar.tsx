@@ -80,11 +80,19 @@ export default function Navbar() {
     setIsMobileSearchOpen(false);
   };
 
-  const clearSearch = () => {
+  // Only clears text, keeps search open/active
+  const clearSearchText = () => {
+    setSearchQuery("");
+    setShowHistory(true); // Show history again since input is empty
+    // Focus remains on input
+  };
+
+  // Closes search and goes home
+  const cancelSearch = () => {
     setSearchQuery("");
     setShowHistory(false);
-    setIsMobileSearchOpen(false); // Close the mobile search bar
-    router.push("/"); // Redirect to Home
+    setIsMobileSearchOpen(false); 
+    router.push("/");
   };
 
   const removeHistoryItem = (e: React.MouseEvent, itemToRemove: string) => {
@@ -116,7 +124,7 @@ export default function Navbar() {
               />
               {searchQuery && (
                 <button 
-                  onClick={clearSearch} // FIXED: Now calls clearSearch() instead of just clearing text
+                  onClick={clearSearchText} // FIXED: Only clears text now
                   className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                 >
                   ✕
@@ -124,7 +132,7 @@ export default function Navbar() {
               )}
             </div>
             <button 
-              onClick={clearSearch} // FIXED: Cancel button also redirects home and closes search
+              onClick={cancelSearch} // FIXED: Redirects home and closes search
               className="text-sm font-medium text-gray-600 whitespace-nowrap px-2"
             >
               Cancel
@@ -180,7 +188,7 @@ export default function Navbar() {
                   />
                   {searchQuery && (
                     <button 
-                      onClick={clearSearch}
+                      onClick={clearSearchText} // Clears text only
                       className="absolute inset-y-0 right-0 pr-3 flex items-center text-gray-400 hover:text-gray-600"
                     >
                       ✕
