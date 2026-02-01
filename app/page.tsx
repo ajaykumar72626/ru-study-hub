@@ -2,6 +2,10 @@ import Link from "next/link";
 import { db } from "@/app/lib/firebase";
 import { collection, query, orderBy, limit, getDocs } from "firebase/firestore";
 
+// --- FORCE DYNAMIC (New Line) ---
+// This tells Next.js: "Re-fetch data from Firebase every time someone visits the home page."
+export const dynamic = "force-dynamic"; 
+
 // --- FETCH RECENT UPDATES (Server Side) ---
 async function getRecentUpdates() {
   const updates: any[] = [];
@@ -38,7 +42,6 @@ async function getRecentUpdates() {
 
   } catch (error) {
     console.error("Error fetching updates:", error);
-    // Fail silently so the home page still loads even if DB is empty
   }
 
   // Combine, Sort by Date (Newest First), and take top 4
@@ -62,7 +65,7 @@ export default async function Home() {
       {/* HEADER REMOVED - Using Global Navbar from layout.tsx */}
 
       <main className="flex-grow">
-        {/* --- HERO SECTION (Original Design) --- */}
+        {/* --- HERO SECTION --- */}
         <section className="bg-blue-700 text-white py-16 px-4 text-center">
           <div className="max-w-3xl mx-auto space-y-4">
             <h2 className="text-3xl md:text-5xl font-extrabold leading-tight">
@@ -75,7 +78,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* --- RECENT UPDATES SECTION (New) --- */}
+        {/* --- RECENT UPDATES SECTION (Now Updates Instantly) --- */}
         {recentItems.length > 0 && (
           <section className="max-w-6xl mx-auto px-4 pt-12 -mb-4">
             <div className="bg-blue-50 border border-blue-100 rounded-xl p-6">
@@ -104,7 +107,7 @@ export default async function Home() {
           </section>
         )}
 
-        {/* --- SEMESTER GRID (Original Design) --- */}
+        {/* --- SEMESTER GRID --- */}
         <section className="max-w-6xl mx-auto px-4 py-12">
           <div className="bg-white rounded-xl shadow-xl border border-gray-100 p-6 md:p-8">
             <h3 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
@@ -136,7 +139,7 @@ export default async function Home() {
           </div>
         </section>
 
-        {/* --- FEATURES SECTION (Original Design) --- */}
+        {/* --- FEATURES SECTION --- */}
         <section className="max-w-6xl mx-auto px-4 py-8 mb-12">
           <div className="grid md:grid-cols-3 gap-6 text-center">
             <div className="p-4">
